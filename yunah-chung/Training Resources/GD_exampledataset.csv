@@ -1,0 +1,46 @@
+Building_Name,Energy_Usage (kWh),Water_Usage (gal),GHG_Emissions (kg),Waste_Generation (kg/month),Type_of_Building
+Eco Tower,45000,28000,6000,350,Residential
+Green Office,32000,18000,4800,280,Comercial
+Solaris Mall,75000,42000,10500,600,Comercial
+Sustainable HQ,56000,32000,7000,400,Comercial
+Eco Haven,39000,,5800,330,School
+Eco Dynamics,42000,24000,6500,370,Residential
+Green Plaza,30000,17000,4500,260,Comercial
+Solar Heights,68000,38000,9500,550,Residential
+Terra Green,59000,33000,7200,420,School
+BioTech Tower,48000,27000,6000,350,School
+Eco Innovations,44000,25000,6200,360,Comercial
+Aqua Center,67000,37000,9200,530,Residential
+Harmony Hall,51000,29000,6800,390,School
+Green Horizon,43000,24000,6100,350,Residential
+Solar Power Plaza,72000,40000,10000,580,Comercial
+Eco Office Park,55000,31000,6900,400,Residential
+Sustainable Hub,60000,34000,7500,430,Comercial
+Nature's Place,36000,20000,5200,300,School
+Green Terrace,40000,23000,5900,340,Residential
+Solar Heights,63000,36000,8800,510,Residential
+BioTech Center,47000,26000,6200,360,Comercial
+Eco Oasis,41000,23000,5800,330,School
+Green Park,48000,27000,6900,400,Residential
+Sunrise Tower,70000,39000,9600,550,Comercial
+Eco Village,52000,29000,7000,410,Residential
+Green Innovations,46000,26000,6500,370,Comercial
+Sunset View,64000,36000,9200,530,School
+Eco Center,55000,31000,7500,430,School
+Green Living,38000,21000,5500,320,Residential
+Sunshine Plaza,43000,24000,6000,350,Comercial
+Eco Heights,60000,34000,8400,490,Residential
+Green Oasis,49000,28000,7200,420,School
+Sunrise Terrace,72000,40000,10000,580,Residential
+Eco Complex,58000,33000,8000,460,Residential
+Green Haven,52000,29000,7000,410,School
+Sunset Tower,66000,37000,9200,530,Residential
+Eco Innovations,44000,25000,6200,360,Comercial
+Green Park,48000,27000,6900,400,Residential
+Sunrise Plaza,68000,38000,9500,550,Residential
+Eco Village,52000,29000,7000,410,School
+Green Oasis,49000,28000,7200,420,School
+Sunshine View,65000,36000,8900,520,School
+Eco Heights,60000,34000,8400,490,Residential
+Green Living,38000,21000,5500,320,School
+Sunset Terrace,41000,23000,5800,330,Residential
