@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>India Power Plant Emissions</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; }
+    #map { width: 100vw; height: 100vh; }
+
+    .legend {
+      background: white;
+      padding: 12px 16px;
+      border-radius: 8px;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.25);
+      font-size: 13px;
+      line-height: 1.9;
+    }
+    .legend h4 { margin-bottom: 6px; font-size: 14px; font-weight: 600; }
+    .legend-item { display: flex; align-items: center; gap: 8px; }
+    .legend-swatch { width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0; }
+    .legend-size-row {
+      display: flex; align-items: center; gap: 8px;
+      margin-top: 8px; padding-top: 8px;
+      border-top: 1px solid #eee; font-size: 12px; color: #666;
+    }
+    .legend-circles { display: flex; align-items: flex-end; gap: 6px; }
+    .legend-circle {
+      border-radius: 50%; border: 1.5px solid #888;
+      background: transparent; flex-shrink: 0;
+    }
+
+    .leaflet-tooltip.pie-tooltip {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 7px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      padding: 9px 13px;
+      font-size: 13px;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    .leaflet-tooltip.pie-tooltip::before { display: none; }
+    .tip-title { font-weight: 600; font-size: 13px; margin-bottom: 7px; color: #222; }
+    .tip-row { display: flex; align-items: center; gap: 7px; padding: 3px 0; color: #444; }
+    .tip-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .tip-label { flex: 1; }
+    .tip-value { font-weight: 500; color: #111; margin-left: 12px; }
+    .tip-divider { border: none; border-top: 1px solid #eee; margin: 5px 0; }
+    .tip-total { font-size: 12px; color: #888; padding-top: 2px; }
+
+    .popup-title { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+    .popup-state { font-size: 12px; color: #777; margin-bottom: 10px; }
+    .popup-row {
+      display: flex; justify-content: space-between;
+      align-items: center; gap: 16px;
+      font-size: 13px; padding: 3px 0;
+    }
+    .popup-row span:first-child { color: #555; display: flex; align-items: center; gap: 5px; }
+    .popup-row span:last-child { font-weight: 500; }
+    .popup-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .popup-divider { border: none; border-top: 1px solid #eee; margin: 6px 0; }
+    .popup-total { display: flex; justify-content: space-between; font-size: 12px; color: #888; padding-top: 2px; }
+  </style>
+</head>
+<body>
+<div id="map"></div>
+<script>
+/* =====================================================================
+   CONFIGURATION
+   ===================================================================== */
+const FIELDS      = ["Coal Emissions", "Gas Emissions"];
+const LABELS      = ["Coal Emissions", "Gas Emissions"];
+const COLORS      = ["#e05c5c", "#5b8fde"];
+const TITLE_FIELD = "Plant";
+const STATE_FIELD = "State";
+const MIN_SIZE    = 24;
+const MAX_SIZE    = 72;
+
+/* =====================================================================
+   EMBEDDED GEOJSON
+   ===================================================================== */
+const GEOJSON = {"type":"FeatureCollection","name":"ConceptJSON","crs":{"type":"name","properties":{"name":"urn:ogc:def:crs:OGC:1.3:CRS84"}},"features":[{"type":"Feature","properties":{"Plant":"BAKRESWAR TPS","State":"West Bengal","Coal Emissions":5.0,"Gas Emissions":2.0,"Size":7.0},"geometry":{"type":"Point","coordinates":[87.45166574,23.82920283]}},{"type":"Feature","properties":{"Plant":"BANDEL TPS","State":"West Bengal","Coal Emissions":4.0,"Gas Emissions":0.0,"Size":4.0},"geometry":{"type":"Point","coordinates":[88.40439285,22.99345949]}},{"type":"Feature","properties":{"Plant":"BARAUNI TPS","State":"Bihar","Coal Emissions":3.0,"Gas Emissions":5.0,"Size":8.0},"geometry":{"type":"Point","coordinates":[86.02202288,25.40094671]}},{"type":"Feature","properties":{"Plant":"BARH STPS","State":"Bihar","Coal Emissions":2.0,"Gas Emissions":19.0,"Size":21.0},"geometry":{"type":"Point","coordinates":[85.7369172,25.48827373]}},{"type":"Feature","properties":{"Plant":"BOKARO TPS `A` EXP","State":"Jharkhand","Coal Emissions":1.0,"Gas Emissions":2.0,"Size":3.0},"geometry":{"type":"Point","coordinates":[85.87940696,23.7865774]}},{"type":"Feature","properties":{"Plant":"BUDGE BUDGE TPS","State":"West Bengal","Coal Emissions":5.0,"Gas Emissions":5.0,"Size":10.0},"geometry":{"type":"Point","coordinates":[88.14007352,22.46631121]}},{"type":"Feature","properties":{"Plant":"CHANDRAPURA(DVC) TPS","State":"Jharkhand","Coal Emissions":1.0,"Gas Emissions":5.0,"Size":6.0},"geometry":{"type":"Point","coordinates":[86.12007383,23.7419487]}},{"type":"Feature","properties":{"Plant":"D.P.L. TPS","State":"West Bengal","Coal Emissions":4.0,"Gas Emissions":1.0,"Size":5.0},"geometry":{"type":"Point","coordinates":[87.30520887,23.51989103]}},{"type":"Feature","properties":{"Plant":"DARLIPALI STPS","State":"Odisha","Coal Emissions":3.5,"Gas Emissions":2.0,"Size":5.5},"geometry":{"type":"Point","coordinates":[83.89143277,21.96418971]}}]};
+
+/* ===================================================================== */
+
+const map = L.map("map");
+L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+  attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/">CARTO</a>',
+  subdomains: "abcd",
+  maxZoom: 19
+}).addTo(map);
+
+// Legend
+const legend = L.control({ position: "bottomright" });
+legend.onAdd = () => {
+  const mid = Math.round((MIN_SIZE + MAX_SIZE) / 2);
+  const div = L.DomUtil.create("div", "legend");
+  div.innerHTML =
+    "<h4>Emissions by type</h4>" +
+    FIELDS.map((f, i) => `
+      <div class="legend-item">
+        <div class="legend-swatch" style="background:${COLORS[i]}"></div>
+        <span>${LABELS[i]}</span>
+      </div>`).join("") +
+    `<div class="legend-size-row">
+      <span>Total emissions</span>
+      <div class="legend-circles">
+        <div class="legend-circle" style="width:${MIN_SIZE}px;height:${MIN_SIZE}px"></div>
+        <div class="legend-circle" style="width:${mid}px;height:${mid}px"></div>
+        <div class="legend-circle" style="width:${MAX_SIZE}px;height:${MAX_SIZE}px"></div>
+      </div>
+    </div>`;
+  return div;
+};
+legend.addTo(map);
+
+// Render points
+const features  = GEOJSON.features.filter(f => f.geometry && f.geometry.type === "Point");
+const coords    = features.map(f => [f.geometry.coordinates[1], f.geometry.coordinates[0]]);
+map.fitBounds(L.latLngBounds(coords).pad(0.15));
+
+const totals    = features.map(f => FIELDS.reduce((s, fld) => s + (Number(f.properties[fld]) || 0), 0));
+const sizeScale = d3.scaleSqrt().domain([0, d3.max(totals)]).range([MIN_SIZE, MAX_SIZE]);
+
+features.forEach(feature => {
+  const [lng, lat] = feature.geometry.coordinates;
+  const props  = feature.properties || {};
+  const values = FIELDS.map(f => Number(props[f]) || 0);
+  const total  = values.reduce((a, b) => a + b, 0);
+
+  const plant = props[TITLE_FIELD] || "";
+  const state = props[STATE_FIELD] || "";
+
+  // Tooltip — each variable on its own line
+  const tipRows = FIELDS.map((f, i) => `
+    <div class="tip-row">
+      <span class="tip-dot" style="background:${COLORS[i]}"></span>
+      <span class="tip-label">${LABELS[i]}</span>
+      <span class="tip-value">${values[i].toLocaleString()}</span>
+    </div>`).join("");
+
+  const tooltipHtml = `
+    <div class="tip-title">${plant}${state ? ` <span style="font-weight:400;color:#888;font-size:11px">· ${state}</span>` : ""}</div>
+    ${tipRows}
+    <hr class="tip-divider">
+    <div class="tip-total">Total: ${total.toLocaleString()}</div>`;
+
+  // Popup
+  const popupRows = FIELDS.map((f, i) => {
+    const pct = total > 0 ? ((values[i] / total) * 100).toFixed(1) : "0.0";
+    return `
+      <div class="popup-row">
+        <span><span class="popup-dot" style="background:${COLORS[i]}"></span>${LABELS[i]}</span>
+        <span>${values[i].toLocaleString()} (${pct}%)</span>
+      </div>`;
+  }).join("");
+
+  const popupHtml = `
+    <div class="popup-title">${plant}</div>
+    ${state ? `<div class="popup-state">${state}</div>` : ""}
+    ${popupRows}
+    <hr class="popup-divider">
+    <div class="popup-total"><span>Total</span><span>${total.toLocaleString()}</span></div>`;
+
+  // SVG pie
+  const chartSize = total > 0 ? sizeScale(total) : MIN_SIZE;
+  const r   = chartSize / 2;
+  const pie = d3.pie().sort(null)(values);
+  const arc = d3.arc().innerRadius(0).outerRadius(r);
+  const paths = pie.map((slice, i) =>
+    `<path d="${arc(slice)}" fill="${COLORS[i]}" stroke="white" stroke-width="1.2" opacity="0.93"/>`
+  ).join("");
+  const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" width="${chartSize}" height="${chartSize}" viewBox="${-r} ${-r} ${chartSize} ${chartSize}">${paths}</svg>`;
+
+  const icon = L.divIcon({
+    html: svgStr,
+    className: "",
+    iconSize: [chartSize, chartSize],
+    iconAnchor: [r, r]
+  });
+
+  const marker = L.marker([lat, lng], { icon });
+  marker.bindTooltip(tooltipHtml, { sticky: true, className: "pie-tooltip", offset: [12, 0] });
+  marker.bindPopup(popupHtml, { minWidth: 240 });
+  marker.addTo(map);
+});
+</script>
+</body>
+</html>
